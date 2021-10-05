@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Notes</string>
+    <string name="notes_title">title</string>
+    <string name="notes">notes</string>
+    <string name="delete_all_items">delete all items</string>
+    <string name="searchbar">searchbar</string>
+    <string name="title">title</string>
+    <string name="add_notes">Add Notes</string>
+    <string name="update_notes">Update Notes</string>
+</resources>
