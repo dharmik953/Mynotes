@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
@@ -14,10 +13,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.view.View;
-import android.widget.SearchView;
 import android.widget.Toast;
-
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
@@ -30,10 +26,10 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     RecyclerView recyclerView;
-    FloatingActionButton button;
-    Adpater adpater;
+    FloatingActionButton fab;
+    Adapter adapter;
     List<Model> notesList;
-    Database database;
+    DatabaseClass databaseClass;
     CoordinatorLayout coordinatorLayout;
 
     @Override
@@ -42,83 +38,49 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         recyclerView = findViewById(R.id.recyclerview);
-        button = findViewById(R.id.add_button);
+        fab = findViewById(R.id.add_button);
         coordinatorLayout = findViewById(R.id.layout_main);
 
-        notesList = new ArrayList<>();
-        recyclerView.setLayoutManager(new LinearLayoutManager(this ));
-        adpater = new Adpater(this,MainActivity.this,notesList);
-        recyclerView.setAdapter(adpater);
-
-        database = new Database(this);
-
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
-        itemTouchHelper.attachToRecyclerView(recyclerView);
-
-        fatchAllNotesFromDatabase();
-
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, addNotes.class);
-                startActivity(intent);
-            }
+        fab.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, AddNotesActivity.class);
+            startActivity(intent);
         });
 
+        notesList = new ArrayList<>();
+        databaseClass = new DatabaseClass(this);
+        fatchAllNotesFromDatabase();
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new Adapter(this, MainActivity.this, notesList);
+        recyclerView.setAdapter(adapter);
+
+        ItemTouchHelper helper = new ItemTouchHelper(callback);
+        helper.attachToRecyclerView(recyclerView);
     }
 
     void fatchAllNotesFromDatabase(){
 
-        Cursor cursor = database.readAllNotes();
-        
-        if (cursor.getCount() == 0){
-            Toast.makeText(this, "No data", Toast.LENGTH_SHORT).show();
-        }
-        else {
-            while (cursor.moveToNext()){
-                notesList.add(new Model(cursor.getString(0),cursor.getString(1),cursor.getString(2)));
+        Cursor cursor = databaseClass.readAllNotes();
+
+        if (cursor.getCount() == 0) {
+            Toast.makeText(this, "No Data to show", Toast.LENGTH_SHORT).show();
+        } else {
+            while (cursor.moveToNext()) {
+                notesList.add(new Model(cursor.getString(0), cursor.getString(1), cursor.getString(2)));
             }
         }
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.delet_all_notes){
+        if (item.getItemId() == R.id.delet_all_notes) {
             deleteAllNotes();
         }
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-        getMenuInflater().inflate(R.menu.options_menu,menu);
-
-        MenuItem searchItem = menu.findItem(R.id.searchbar);
-        SearchView searchView  = (SearchView) searchItem.getActionView();
-        searchView.setQueryHint("Search Notes Here");
-
-        SearchView.OnQueryTextListener listener = new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                adpater.getFilter().filter(newText);
-                return true;
-            }
-        };
-
-        searchView.setOnQueryTextListener(listener);
-
-        return super.onCreateOptionsMenu(menu);
-    }
-
     private void deleteAllNotes(){
-        Database db = new Database(MainActivity.this);
+        DatabaseClass db = new DatabaseClass(MainActivity.this);
         db.deleteAllnotes();
         Toast.makeText(this, "deleted all notes", Toast.LENGTH_SHORT).show();
         recreate();
@@ -133,27 +95,28 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onSwiped(@NonNull @NotNull RecyclerView.ViewHolder viewHolder, int direction) {
 
-            int positoin = viewHolder.getAdapterPosition();
-            Model item = adpater.getList().get(positoin);
+            int position = viewHolder.getAdapterPosition();
+            Model item = adapter.getList().get(position);
 
-            adpater.removeItem(viewHolder.getAdapterPosition());
-            Snackbar snackbar = Snackbar.make(coordinatorLayout,"Item deleted",Snackbar.LENGTH_LONG).setAction("UNDO", new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    adpater.restoreItem(item,positoin);
-                    recyclerView.scrollToPosition(positoin);
-                }
-            }).addCallback(new BaseTransientBottomBar.BaseCallback<Snackbar>() {
+            adapter.removeItem(viewHolder.getAdapterPosition());
+
+            Snackbar snackbar = Snackbar.make(coordinatorLayout, "Item Deleted", Snackbar.LENGTH_LONG);
+            snackbar.setAction("UNDO", v -> {
+                adapter.restoreItem(item, position);
+                recyclerView.scrollToPosition(position);
+            });
+            snackbar.addCallback(new BaseTransientBottomBar.BaseCallback<Snackbar>() {
                 @Override
                 public void onDismissed(Snackbar transientBottomBar, int event) {
                     super.onDismissed(transientBottomBar, event);
 
-                    if (!(event == DISMISS_EVENT_ACTION)){
-                        Database database = new Database(MainActivity.this);
-                        database.removeSingleItem(item.getId());
+                    if (!(event == DISMISS_EVENT_ACTION)) {
+                        DatabaseClass db = new DatabaseClass(MainActivity.this);
+                        db.removeSingleItem(item.getId());
                     }
                 }
             });
+
             snackbar.setActionTextColor(Color.WHITE);
             snackbar.show();
         }

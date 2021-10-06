@@ -10,7 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class update_notes extends AppCompatActivity {
+public class UpdateNotesActivity extends AppCompatActivity {
 
     EditText title, description;
     Button updateNotes;
@@ -35,16 +35,16 @@ public class update_notes extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(!TextUtils.isEmpty(title.getText().toString()) && !TextUtils.isEmpty(description.getText().toString())){
-                    Database db  = new Database(update_notes.this);
+                    DatabaseClass db  = new DatabaseClass(UpdateNotesActivity.this);
                     db.updateNotes(title.getText().toString() , description.getText().toString(),id);
 
-                    Intent intent = new Intent(update_notes.this, MainActivity.class);
+                    Intent intent = new Intent(UpdateNotesActivity.this, MainActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
                     finish();
                 }
                 else {
-                    Toast.makeText(update_notes.this, "Both fields required", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(UpdateNotesActivity.this, "Both fields required", Toast.LENGTH_SHORT).show();
                 }
             }
         });
