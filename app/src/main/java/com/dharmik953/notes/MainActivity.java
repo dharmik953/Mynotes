@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
@@ -58,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
         helper.attachToRecyclerView(recyclerView);
     }
 
+
+
     void fatchAllNotesFromDatabase(){
 
         Cursor cursor = databaseClass.readAllNotes();
@@ -69,6 +72,14 @@ public class MainActivity extends AppCompatActivity {
                 notesList.add(new Model(cursor.getString(0), cursor.getString(1), cursor.getString(2)));
             }
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.menu,menu);
+
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
