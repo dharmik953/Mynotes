@@ -8,4 +8,5 @@
     <string name="add_notes">Add Notes</string>
     <string name="update_notes">Update Notes</string>
     <string name="hint">hint</string>
+    <string name="delete_all_notes">Delete All Notes</string>
 </resources>

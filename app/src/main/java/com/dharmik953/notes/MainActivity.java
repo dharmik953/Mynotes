@@ -1,5 +1,6 @@
 package com.dharmik953.notes;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -8,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -81,6 +83,41 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onCreateOptionsMenu(menu);
     }
+
+//******  Alert Dialog  **********************************************************************************************************************************************************************************************************
+
+    @Override
+    public void onBackPressed() {
+
+//        Toast.makeText(getApplicationContext(), "back pressed", Toast.LENGTH_SHORT).show();
+        
+        AlertDialog.Builder ab = new AlertDialog.Builder(MainActivity.this);
+        ab.setTitle("Alert!");
+        ab.setMessage("are you sure to exit?");
+        ab.setPositiveButton("yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                //if you want to kill app . from other then your main avtivity.(Launcher)
+                android.os.Process.killProcess(android.os.Process.myPid());
+                System.exit(1);
+
+                //if you want to finish just current activity
+
+                MainActivity.this.finish();
+            }
+        });
+        ab.setNegativeButton("no", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        ab.show();
+    }
+
+//**********************************************************************************************************************************************************************************************************************************************
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
